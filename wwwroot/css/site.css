@@ -1,18 +1,86 @@
+:root {
+    --mainbg: #ffc72c;
+}
+
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+    margin-bottom: 60px;
+}
+
+.navbar {
+    background-color: var(--mainbg);
+}
+
+.hero {
+    width: 100%;
+    height: auto; 
+    max-height: 600px; 
+    object-fit: cover; 
+}
+
+.centerContent {
+    text-align: center;
+}
+
+.tarjeta {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 420px;
+    border: 1px solid lightgray;
+    box-shadow: 2px 2px 8px 4px #d3d3d3d1;
+    border-radius: 15px;
+    font-family: sans-serif;
+}
+
+.titulo {
+    font-size: 24px;
+    padding: 10px 10px 0 10px;
+}
+
+.cuerpo {
+    padding: 10px;
+}
+
+.pie {
+    background: #6699ff;
+    border-radius: 0 0 15px 15px;
+    padding: 10px;
+    text-align: center;
+}
+
+    .pie a {
+        text-decoration: none;
+        color: white;
+    }
+
+        .pie a:after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+            content: "";
+        }
+
+.logo {
+    width: 100px;
 }

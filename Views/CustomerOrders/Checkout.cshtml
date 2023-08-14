@@ -1,0 +1,45 @@
+﻿@model decimal
+
+<h2>Checkout</h2>
+
+<form id="payment-form" method="post">
+    <label>Amount:</label>
+    <input type="number" name="amount" value="@Model" readonly /><br />
+    <label>Description:</label>
+    <input type="text" name="description" /><br />
+    <div id="card-element"></div>
+    <button id="submit">Pay</button>
+</form>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- JavaScript code to handle Stripe payment -->
+<script>
+    var stripe = Stripe('pk_test_51NeqdNHN7kOD3K4h1ss1T5eRuj8ZLzxQH9TA84t8rosSls73VbzDJ5s5t5CBHZrlgJ8iuRk3QnR0Zeoh1QEVjiXm00ioNSlhRW');
+    var elements = stripe.elements();
+
+    var cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+
+    var form = document.getElementById('payment-form');
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        document.getElementById('submit').disabled = true;
+
+        stripe.confirmCardPayment('@ViewBag.ClientSecret', {
+            payment_method: {
+                card: cardElement
+            }
+        }).then(function (result) {
+            if (result.error) {
+
+                document.getElementById('submit').disabled = false;
+            } else {
+
+                window.location.href = '@Url.Action("ThankYou", "Order")';
+            }
+        });
+    });
+</script>

@@ -1,0 +1,36 @@
+﻿
+.product-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+
+.product-tile {
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(33.33% - 20px);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+}
+
+    .product-tile h3 {
+        margin-top: 0;
+    }
+
+    .product-tile a {
+        text-decoration: none;
+        color: #007bff;
+        margin-right: 10px;
+    }
+
+        .product-tile a:hover {
+            text-decoration: underline;
+        }
+
+    .product-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }

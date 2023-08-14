@@ -1,66 +1,53 @@
-﻿@model IEnumerable<Easyshop.Models.Product>
+﻿@model IEnumerable<EasyShop.Models.Product>
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var isAdmin = User.IsInRole("Admin");
+    var isCustomer = User.IsInRole("Customer");
 }
 
-<h1>Index</h1>
+<h1>Our Products List</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Availability)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Store)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Availability)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Store.Address)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ProductId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProductId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
-            </td>
-        </tr>
+@if (isAdmin)
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
 }
-    </tbody>
-</table>
+
+@if (!isCustomer)
+{
+    <p>In order to buy any product, you need to log in or register.</p>
+}
+
+<div class="product-tiles">
+    @foreach (var item in Model)
+    {
+        <div class="product-tile">
+            <h3>@Html.DisplayFor(modelItem => item.Name)</h3>
+            <p>@Html.DisplayFor(modelItem => item.Description)</p>
+            <p>Price: $@Html.DisplayFor(modelItem => item.Price)</p>
+
+            @if (isAdmin)
+            {
+                <p>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </p>
+            }
+            else if (isCustomer)
+            {
+                <p>
+                    <a asp-area="" asp-controller="CustomerOrders" asp-action="Add" asp-route-productId="@item.Id" asp-route-quantity="1">Add to cart</a>
+                </p>
+            }
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <p>There aren't any products available now.</p>
+}
