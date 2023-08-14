@@ -1,8 +1,8 @@
-﻿using Easyshop.Models;
+﻿using EasyShop.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Easyshop.Controllers
+namespace EasyShop.Controllers
 {
     public class HomeController : Controller
     {

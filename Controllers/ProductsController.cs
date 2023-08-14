@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Easyshop.Data;
-using Easyshop.Models;
+using EasyShop.Data;
+using EasyShop.Models;
+using Microsoft.AspNetCore.Authorization;
 
-namespace Easyshop.Controllers
+namespace EasyShop.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,10 +22,12 @@ namespace Easyshop.Controllers
         }
 
         // GET: Products
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Products.Include(p => p.Store);
-            return View(await applicationDbContext.ToListAsync());
+              return _context.Products != null ? 
+                          View(await _context.Products.ToListAsync()) :
+                          Problem("Entity set 'ApplicationDbContext.Products'  is null.");
         }
 
         // GET: Products/Details/5
@@ -35,8 +39,7 @@ namespace Easyshop.Controllers
             }
 
             var product = await _context.Products
-                .Include(p => p.Store)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -46,9 +49,9 @@ namespace Easyshop.Controllers
         }
 
         // GET: Products/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Address");
             return View();
         }
 
@@ -57,7 +60,7 @@ namespace Easyshop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,Category,Availability,StoreId")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -65,11 +68,11 @@ namespace Easyshop.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Address", product.StoreId);
             return View(product);
         }
 
         // GET: Products/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Products == null)
@@ -82,7 +85,6 @@ namespace Easyshop.Controllers
             {
                 return NotFound();
             }
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Address", product.StoreId);
             return View(product);
         }
 
@@ -91,9 +93,10 @@ namespace Easyshop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price,Category,Availability,StoreId")] Product product)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price")] Product product)
         {
-            if (id != product.ProductId)
+            if (id != product.Id)
             {
                 return NotFound();
             }
@@ -107,7 +110,7 @@ namespace Easyshop.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductId))
+                    if (!ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -118,11 +121,11 @@ namespace Easyshop.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["StoreId"] = new SelectList(_context.Stores, "StoreId", "Address", product.StoreId);
             return View(product);
         }
 
         // GET: Products/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Products == null)
@@ -131,8 +134,7 @@ namespace Easyshop.Controllers
             }
 
             var product = await _context.Products
-                .Include(p => p.Store)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -144,6 +146,7 @@ namespace Easyshop.Controllers
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Products == null)
@@ -153,6 +156,11 @@ namespace Easyshop.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
+                var inOrders = await _context.OrderDetails.Where(od => od.ProductId == id).CountAsync();
+
+                if (inOrders > 0) {
+                    return Problem("This Product belong to a Order, Imposible to delete it.");
+                }
                 _context.Products.Remove(product);
             }
             
@@ -162,7 +170,7 @@ namespace Easyshop.Controllers
 
         private bool ProductExists(int id)
         {
-          return (_context.Products?.Any(e => e.ProductId == id)).GetValueOrDefault();
+          return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
